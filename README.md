@@ -51,3 +51,9 @@ Run the following command to get the micromanager source code in the `micro-mana
 ```bash
 git submodule update --init --recursive
 ```
+
+
+## Set the required environment variables
+
+- `MM_INSTALL_DIR`: should be the installation directory of MicroManager.
+
