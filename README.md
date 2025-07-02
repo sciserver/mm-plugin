@@ -55,3 +55,23 @@ git submodule update --init --recursive
 # This book is helpful for writing plugins
 https://imagingbook.com
 https://link.springer.com/book/10.1007/978-3-031-05744-1, Appendix I
+
+
+
+### Developing
+
+The plugin code is in the `flfm` directory.
+
+To check formatting, run
+
+```bash
+cd flfm
+mvn spotless:check
+```
+
+To format the code, run
+
+```bash
+cd flfm
+mvn spotless:format
+```
