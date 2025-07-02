@@ -15,4 +15,7 @@ public class Constants {
   public static final String LBL_ITERATIONS = "Iterations:";
   public static final String TITLE_STANDALONE_UI = "FLFM Standalone";
   public static final String TITLE_PLUGIN_UI = "FLFM Plugin";
+
+  public static final String LBL_SELECT_IMG = "Select an image:";
+  public static final String LBL_PROMPT_TITLE = "Open Image";
 }

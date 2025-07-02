@@ -35,7 +35,7 @@ public class UtilsUI {
         (String)
             javax.swing.JOptionPane.showInputDialog(
                 parent,
-                "Select an image:",
+                Constants.LBL_SELECT_IMG,
                 "Open Images",
                 javax.swing.JOptionPane.PLAIN_MESSAGE,
                 null,
