@@ -25,4 +25,3 @@ replay_pid*
 
 # this is where the linux docker image puts the ImageJ install
 mm_install/
-
