@@ -4,18 +4,18 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.*;
+import java.io.File;
+
+import ij.ImagePlus;
+import ij.WindowManager;
 
 public class PluginUI extends JFrame{
-    private JFrame frame;
     private JButton getImageButton;
     private JButton getPSFButton;
-
-    // Row 2 --  Panel that displays two images side by side
-    private JPanel imagePanel;
-    private JLabel imageLabel1;
-    private JLabel imageLabel2;
-
-    // Row 3
+    private JTextField psfTextField;
+    private JTextField imageTextField;
+    private ImagePlus psfImage;
+    private ImagePlus inputImage;
     private JComboBox<Integer> iterationJComboBox;
     private JButton calculateButton;
 
@@ -31,93 +31,113 @@ public class PluginUI extends JFrame{
         setVisible(true);
     }
 
+    private ImagePlus getImageFromFile(String title) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle(title);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("TIFF Files", "tif", "tiff"));
+        int returnValue = fileChooser.showOpenDialog(this);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            return new ImagePlus(selectedFile.getAbsolutePath());
+        }
+        return null;
+    }
+
+    private ImagePlus getImageFromOpenWindows() {
+        String[] windowTitles = WindowManager.getImageTitles();
+        if (windowTitles.length == 0) {
+            System.out.println("No ImageJ windows found going to disk instead.");
+            return null;
+        }
+        String selectedTitle = (String) JOptionPane.showInputDialog(this, "Select an image:", "Open Images",
+                JOptionPane.PLAIN_MESSAGE, null, windowTitles, windowTitles[0]);
+        if (selectedTitle != null) {
+            return WindowManager.getImage(selectedTitle);
+        }
+        return null;
+    }
+
     private JPanel initControlPanel() {
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
-
-
         int row = 0;
 
-        // Row 1 - Buttons for PSF and Input Image Selection
+        // Row 1 - Buttons for PSF Selection
         gbc.gridx = 0;
         gbc.gridy = row;
-        gbc.weightx = 0.25;
-        gbc.gridwidth = 1; // Reset grid width to 1 for the label
+        gbc.gridwidth = 2;
         getPSFButton = new JButton("Open PSF Image");
         // Add action listener to the PSF button to open the file in psfTextField
         getPSFButton.addActionListener(e -> {
-            // Open a file chooser dialog to select the PSF file
-            // Open a file chooser dialog to select the PSF file
-            JFileChooser psfChooser = new JFileChooser();
-            psfChooser.setFileFilter(new FileNameExtensionFilter("PGM and TIFF files", "pgm", "tif", "tiff"));
-            int returnValue = psfChooser.showOpenDialog(controlPanel);
-            if (returnValue == JFileChooser.APPROVE_OPTION) {
-                // Get the selected file and set it to the text field
-                java.io.File selectedFile = psfChooser.getSelectedFile();
-                psfTextField.setText(selectedFile.getAbsolutePath());
+            ImagePlus img = getImageFromOpenWindows();
+            if (img == null) {
+                img = getImageFromFile("Select PSF Image");
+            }
+            if (img != null){
+                psfImage = img;
+                psfTextField.setText(psfImage.getTitle());
+            }
+            else {
+                psfTextField.setText("No PSF Selected");
             }
         });
-
-
-
-
         controlPanel.add(getPSFButton, gbc);
-        gbc.gridx = 1;
+
+        gbc.gridx = 2;
         gbc.gridy = row;
-        gbc.weightx = 0.75;
-        gbc.gridwidth = 1; // Reset grid width to 1 for the button
-        getImageButton = new JButton("Get Input Image");
+        gbc.gridwidth = 4;
+        psfTextField = new JTextField("No PSF Selected");
+        psfTextField.setEditable(false); // Make the text field non-editable
+        controlPanel.add(psfTextField, gbc);
 
-
-
-
-        // Row 2 - Image Panel
+        // Row 2 - Buttons for Input Image Selection
         row++; // Move to the next row
         gbc.gridx = 0;
         gbc.gridy = row;
-        gbc.weightx = 0.25;
-        gbc.gridwidth = 1; // Reset grid width to 1 for the label
-        controlPanel.add(new JLabel("Images:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridwidth = 2;
+        getImageButton = new JButton("Open Input Image");
+        // Add action listener to the Input button to open the file in imageTextField
+        getImageButton.addActionListener(e -> {
+            ImagePlus img = getImageFromOpenWindows();
+            if (img == null) {
+                img = getImageFromFile("Select Input Image");
+            }
+            if (img != null){
+                inputImage = img;
+                imageTextField.setText(inputImage.getTitle());
+                inputImage.show();
+            }
+            else {
+                imageTextField.setText("No Input Selected");
+            }
+        });
+        controlPanel.add(getImageButton, gbc);
+
+        gbc.gridx = 2;
         gbc.gridy = row;
-        gbc.weightx = 0.75;
-        gbc.gridwidth = 2; // Span two columns for the image panel
+        gbc.gridwidth = 4;
+        imageTextField = new JTextField("No Input Selected");
+        imageTextField.setEditable(false); // Make the text field non-editable
+        controlPanel.add(imageTextField, gbc);
 
-        imagePanel = new JPanel();
-        imagePanel.setLayout(new GridLayout(1, 2, 10, 10)); // Two columns for side
-        imageLabel1 = new JLabel("PSF Preview");
-        imageLabel1.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel1.setPreferredSize(new Dimension(200, 200)); // Set preferred size for the label
-
-
-        imageLabel2 = new JLabel("Input Preview");
-        imageLabel2.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel2.setPreferredSize(new Dimension(200, 200)); // Set preferred size for the label
-        imagePanel.add(imageLabel1);
-        imagePanel.add(imageLabel2);
-        controlPanel.add(imagePanel, gbc);
 
         // Row 3 - Iteration and Calculate Button
         row++; // Move to the next row
         gbc.gridx = 0;
         gbc.gridy = row;
-        gbc.weightx = 0.25;
         gbc.gridwidth = 1; // Reset grid width to 1 for the label
         controlPanel.add(new JLabel("Iterations:"), gbc);
-
         gbc.gridx = 1;
         gbc.gridy = row;
-        gbc.weightx = 0.75;
         iterationJComboBox = new JComboBox<Integer>(getValidChoices());
         iterationJComboBox.setSelectedIndex(0); // Set default selection to the first item
         controlPanel.add(iterationJComboBox, gbc);
-
         gbc.gridx = 2;
+        gbc.gridwidth = 4;
         gbc.gridy = row;
-        gbc.weightx = 0.75;
         calculateButton = new JButton("Calculate");
         controlPanel.add(calculateButton, gbc);
 
@@ -139,8 +159,8 @@ public class PluginUI extends JFrame{
         // Create a simple GUI to display "Hello, World!"
         SwingUtilities.invokeLater(() -> {
             PluginUI pluginUI = new PluginUI();
-            pluginUI.setSize(400, 200);
             pluginUI.setVisible(true);
+            pluginUI.pack(); // Adjust the window size based on its components;
             pluginUI.setLocationRelativeTo(null); // Center the window
         });
     }

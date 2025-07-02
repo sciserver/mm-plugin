@@ -52,8 +52,6 @@ Run the following command to get the micromanager source code in the `micro-mana
 git submodule update --init --recursive
 ```
 
-
-## Set the required environment variables
-
-- `MM_INSTALL_DIR`: should be the installation directory of MicroManager.
-
+# This book is helpful for writing plugins
+https://imagingbook.com
+https://link.springer.com/book/10.1007/978-3-031-05744-1
