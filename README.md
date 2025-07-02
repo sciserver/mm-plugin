@@ -76,7 +76,6 @@ cd flfm
 mvn spotless:format
 ```
 
-
 Models need to go into `src/main/resources/models` they should be named
 according the number of iters they perform. For example, `model_1.pt` will
 come up in the dropdown as `1`.
