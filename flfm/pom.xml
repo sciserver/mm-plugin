@@ -12,7 +12,23 @@
     <url>https://github.com/ssec-jhu/flfm</url>
     <description>Fourier Light Field Microscopy</description>
 
+    <!-- This needs to be 1.8 to work with ImageJ 1.x -->
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <djl.version>0.32.0</djl.version>
+    </properties>
+
     <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ai.djl</groupId>
+                <artifactId>bom</artifactId>
+                <version>${djl.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 
     <dependencies>
@@ -31,11 +47,25 @@
         </dependency>
 
         <dependency>
-        <groupId>ai.djl.pytorch</groupId>
-        <artifactId>pytorch-engine</artifactId>
-        <version>0.32.0</version>
-        <scope>runtime</scope>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-engine</artifactId>
+            <version>0.32.0</version>
+            <scope>runtime</scope>
         </dependency>
+
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-jni</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ai.djl.pytorch</groupId>
+            <artifactId>pytorch-native-cpu</artifactId>
+            <classifier>linux-x86_64</classifier>
+            <scope>runtime</scope>
+        </dependency>
+
     </dependencies>
 
 
@@ -155,10 +185,6 @@
         </plugins>
     </build>
 
-    <!-- This needs to be 1.8 to work with ImageJ 1.x -->
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
+
 
 </project>
