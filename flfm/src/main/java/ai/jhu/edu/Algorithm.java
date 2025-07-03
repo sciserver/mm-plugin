@@ -10,6 +10,7 @@ import ai.djl.ndarray.NDManager;
 import ai.djl.translate.TranslateException;
 import ij.ImagePlus;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -52,8 +53,19 @@ public class Algorithm {
 
       try (Model model = Model.newInstance(modelName, "PyTorch")) {
         try {
-          System.out.println("Loading model " + modelName + " from: " + modelPath.getParent());
-          model.load(modelPath.getParent());
+          // The model will either be loaded from the specified path
+          // if it's being run in the IDE or from the resources/models
+          // directory if it's being run as a packaged JAR.S
+          ClassLoader classLoader = Algorithm.class.getClassLoader();
+          InputStream modelStream = classLoader.getResourceAsStream("models/" + modelPathStr);
+          if (modelStream != null) {
+            // If the model is found in the resources, load it from the stream
+            System.out.println("Loading model from resources: " + modelPathStr);
+            model.load(modelStream);
+          } else {
+            System.out.println("Loading model " + modelName + " from: " + modelPath.getParent());
+            model.load(modelPath.getParent());
+          }
         } catch (IOException | MalformedModelException e) {
           System.err.println("Error loading model: " + e.getMessage());
           return null;

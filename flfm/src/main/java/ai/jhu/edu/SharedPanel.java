@@ -9,6 +9,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 
 // ClassLoader.getResourceAsStream("models/model.onnx")
 
@@ -21,7 +22,6 @@ public class SharedPanel extends JPanel {
   private ij.ImagePlus psfImage;
   private ij.ImagePlus inputImage;
   private JComboBox<String> iterationJComboBox;
-  private JComboBox<String> modelJComboBox;
   private JComboBox<String> deviceComboBox;
   private JButton calculateButton;
   private String[] modelPaths;
@@ -136,39 +136,37 @@ public class SharedPanel extends JPanel {
 
           calculateButton.setEnabled(false);
           calculateButton.setText("Working...");
-          Algorithm.runModel(
-                  modelName,
-                  deviceInfos[deviceComboBox.getSelectedIndex()], // Get selected device
-                  psfImage,
-                  inputImage)
-              .show();
 
-          //   SwingWorker<Object, Void> worker =
-          //     new SwingWorker<Object, Void>() {
-          //     private Algorithm algorithm;
+          SwingWorker<ImagePlus, Void> worker =
+              new SwingWorker<ImagePlus, Void>() {
 
-          //     @Override
-          //     protected Object doInBackground() throws Exception {
-          //       // Run the algorithm in the background and return the result
-          //       return Algorithm.runModel(modelName, psfImage, inputImage);
-          //     }
+                @Override
+                protected ImagePlus doInBackground() throws Exception {
+                  // Run the algorithm in the background and return the result
+                  return Algorithm.runModel(
+                      modelName,
+                      deviceInfos[deviceComboBox.getSelectedIndex()], // Get selected device
+                      psfImage,
+                      inputImage);
+                }
 
-          //     @Override
-          //     protected void done() {
-          //       try {
-          //       ImagePlus result = (ImagePlus) get(); // Retrieve the result from doInBackground
-          //       // You can handle the result here, e.g., display or process it
-          //       System.out.println("Algorithm completed. Result: " + result);
-          //       result.show(); // Show the result image
-          //       } catch (Exception ex) {
-          //         ex.printStackTrace();
-          //       }
-          //       calculateButton.setEnabled(true); // Re-enable the button after calculation
-          //       calculateButton.setText(Constants.BTN_CALCULATE); // Reset button text
-          //     }
-          //     };
+                @Override
+                protected void done() {
+                  ImagePlus result = null;
+                  try {
+                    result = get(); // Retrieve the result from doInBackground
+                  } catch (Exception ex) {
+                    ex.printStackTrace();
+                  }
+                  calculateButton.setEnabled(true); // Re-enable the button after calculation
+                  calculateButton.setText(Constants.BTN_CALCULATE); // Reset button text
+                  if (result != null) {
+                    result.show(); // Show the result image
+                  }
+                }
+              };
 
-          // worker.execute();
+          worker.execute();
         });
 
     this.add(calculateButton, gbc);
