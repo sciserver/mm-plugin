@@ -58,10 +58,11 @@ public class UtilsUI {
     String[] modelPaths = null;
     try (DirectoryStream<Path> stream =
         java.nio.file.Files.newDirectoryStream(modelsPath, "*.pt")) {
-      modelPaths = java.util.stream.StreamSupport.stream(stream.spliterator(), false)
-          .map(Path::toString)
-          .sorted()
-          .toArray(String[]::new);
+      modelPaths =
+          java.util.stream.StreamSupport.stream(stream.spliterator(), false)
+              .map(Path::toString)
+              .sorted()
+              .toArray(String[]::new);
     } catch (Exception e) {
       e.printStackTrace();
     }

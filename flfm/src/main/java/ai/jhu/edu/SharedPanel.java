@@ -9,6 +9,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 
 // ClassLoader.getResourceAsStream("models/model.onnx")
 
@@ -97,18 +98,18 @@ public class SharedPanel extends JPanel {
 
     modelPaths = Optional.of(UtilsUI.getModelLocations()).orElse(new String[] {});
 
-    //extract the valid choices for iterations from the model paths
-    String[] validChoices = java.util.Arrays.stream(modelPaths)
-        .map(path -> path.replaceAll("[^0-9]", ""))
-        .filter(path -> !path.isEmpty())
-        .distinct()
-        .map(Integer::parseInt)
-        .sorted()
-        .map(String::valueOf)
-        .toArray(String[]::new);
+    // extract the valid choices for iterations from the model paths
+    String[] validChoices =
+        java.util.Arrays.stream(modelPaths)
+            .map(path -> path.replaceAll("[^0-9]", ""))
+            .filter(path -> !path.isEmpty())
+            .distinct()
+            .map(Integer::parseInt)
+            .sorted()
+            .map(String::valueOf)
+            .toArray(String[]::new);
 
-    iterationJComboBox =
-        new JComboBox<String>(validChoices);
+    iterationJComboBox = new JComboBox<String>(validChoices);
     iterationJComboBox.setSelectedIndex(0); // Set default selection to the first item
     this.add(iterationJComboBox, gbc);
 
@@ -116,22 +117,37 @@ public class SharedPanel extends JPanel {
     gbc.gridwidth = 4;
     gbc.gridy = row;
     calculateButton = new JButton(Constants.BTN_CALCULATE);
-    calculateButton.addActionListener(e -> {
-        // Get the selected model name
-        String modelName = modelPaths[iterationJComboBox.getSelectedIndex()];
+    calculateButton.addActionListener(
+        e -> {
+          // Get the selected model name
+          String modelName = modelPaths[iterationJComboBox.getSelectedIndex()];
+          System.out.println(modelName);
 
-        System.out.println(modelName);
+          calculateButton.setEnabled(false);
+          calculateButton.setText("Working...");
+          SwingWorker<Void, Void> worker =
+              new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                  // Run the algorithm in the background
+                  Algorithm algorithm =
+                      new Algorithm(modelName, psfTextField.getText(), imageTextField.getText(), 0);
+                  algorithm.run();
+                  return null;
+                }
 
-        // Get the PSF and input image paths
-        // String psfPath = Optional.ofNullable(psfImage).map(ImagePlus::getTitle).orElse("");
-        // String inputPath =
-        //     Optional.ofNullable(inputImage).map(ImagePlus::getTitle).orElse("");
+                @Override
+                protected void done() {
+                  // This method is called on the Event Dispatch Thread after doInBackground()
+                  // completes
+                  System.out.println("Algorithm completed.");
+                  calculateButton.setEnabled(true); // Re-enable the button after calculation
+                  calculateButton.setText(Constants.BTN_CALCULATE); // Reset button text
+                }
+              };
 
-        // // Create and run the algorithm
-        // Algorithm algorithm = new Algorithm(modelName, psfPath, inputPath, 1);
-        // new Thread(algorithm).start();
-    });
-
+          worker.execute();
+        });
 
     this.add(calculateButton, gbc);
     // =====================================================================

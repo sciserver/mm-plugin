@@ -23,8 +23,13 @@ public class Algorithm implements Runnable {
     System.out.println("Input Path: " + inputPath);
     System.out.println("Iterations: " + iterations);
 
+    // sleep for 5 seconds to simulate processing
+    try {
+      Thread.sleep(5000);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      System.err.println("Algorithm interrupted: " + e.getMessage());
+    }
     // Placeholder for actual processing logic
   }
-
-
 }
