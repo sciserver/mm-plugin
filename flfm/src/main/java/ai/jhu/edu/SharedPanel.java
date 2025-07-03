@@ -9,7 +9,6 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingWorker;
 
 // ClassLoader.getResourceAsStream("models/model.onnx")
 
@@ -22,8 +21,11 @@ public class SharedPanel extends JPanel {
   private ij.ImagePlus psfImage;
   private ij.ImagePlus inputImage;
   private JComboBox<String> iterationJComboBox;
+  private JComboBox<String> modelJComboBox;
+  private JComboBox<String> deviceComboBox;
   private JButton calculateButton;
   private String[] modelPaths;
+  private DeviceInfo[] deviceInfos;
 
   public SharedPanel() {
     initComponents();
@@ -114,7 +116,16 @@ public class SharedPanel extends JPanel {
     this.add(iterationJComboBox, gbc);
 
     gbc.gridx = 2;
-    gbc.gridwidth = 4;
+    deviceInfos = Algorithm.getDevices(); // Get available devices
+    // Create a JComboBox for device selection
+    deviceComboBox =
+        new JComboBox<String>(
+            java.util.Arrays.stream(deviceInfos).map(DeviceInfo::toDisplay).toArray(String[]::new));
+    deviceComboBox.setSelectedIndex(0); // Set default selection to the first item
+    this.add(deviceComboBox, gbc);
+
+    gbc.gridx = 3;
+    gbc.gridwidth = 3;
     gbc.gridy = row;
     calculateButton = new JButton(Constants.BTN_CALCULATE);
     calculateButton.addActionListener(
@@ -125,28 +136,39 @@ public class SharedPanel extends JPanel {
 
           calculateButton.setEnabled(false);
           calculateButton.setText("Working...");
-          SwingWorker<Void, Void> worker =
-              new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                  // Run the algorithm in the background
-                  Algorithm algorithm =
-                      new Algorithm(modelName, psfTextField.getText(), imageTextField.getText(), 0);
-                  algorithm.run();
-                  return null;
-                }
+          Algorithm.runModel(
+                  modelName,
+                  deviceInfos[deviceComboBox.getSelectedIndex()], // Get selected device
+                  psfImage,
+                  inputImage)
+              .show();
 
-                @Override
-                protected void done() {
-                  // This method is called on the Event Dispatch Thread after doInBackground()
-                  // completes
-                  System.out.println("Algorithm completed.");
-                  calculateButton.setEnabled(true); // Re-enable the button after calculation
-                  calculateButton.setText(Constants.BTN_CALCULATE); // Reset button text
-                }
-              };
+          //   SwingWorker<Object, Void> worker =
+          //     new SwingWorker<Object, Void>() {
+          //     private Algorithm algorithm;
 
-          worker.execute();
+          //     @Override
+          //     protected Object doInBackground() throws Exception {
+          //       // Run the algorithm in the background and return the result
+          //       return Algorithm.runModel(modelName, psfImage, inputImage);
+          //     }
+
+          //     @Override
+          //     protected void done() {
+          //       try {
+          //       ImagePlus result = (ImagePlus) get(); // Retrieve the result from doInBackground
+          //       // You can handle the result here, e.g., display or process it
+          //       System.out.println("Algorithm completed. Result: " + result);
+          //       result.show(); // Show the result image
+          //       } catch (Exception ex) {
+          //         ex.printStackTrace();
+          //       }
+          //       calculateButton.setEnabled(true); // Re-enable the button after calculation
+          //       calculateButton.setText(Constants.BTN_CALCULATE); // Reset button text
+          //     }
+          //     };
+
+          // worker.execute();
         });
 
     this.add(calculateButton, gbc);

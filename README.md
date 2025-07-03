@@ -73,7 +73,7 @@ To format the code, run
 
 ```bash
 cd flfm
-mvn spotless:format
+mvn spotless:apply
 ```
 
 Models need to go into `src/main/resources/models` they should be named
