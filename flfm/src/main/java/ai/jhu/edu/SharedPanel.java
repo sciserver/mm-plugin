@@ -20,8 +20,9 @@ public class SharedPanel extends JPanel {
   private JTextField imageTextField;
   private ij.ImagePlus psfImage;
   private ij.ImagePlus inputImage;
-  private JComboBox<Integer> iterationJComboBox;
+  private JComboBox<String> iterationJComboBox;
   private JButton calculateButton;
+  private String[] modelPaths;
 
   public SharedPanel() {
     initComponents();
@@ -67,7 +68,7 @@ public class SharedPanel extends JPanel {
     // Add action listener to the Input button to open the file in imageTextField
     getImageButton.addActionListener(
         e -> {
-          inputImage = UtilsUI.getImage(this, "Select Input Image");
+          inputImage = UtilsUI.getImage(this, Constants.LBL_SELECT_INPUT);
 
           imageTextField.setText(
               Optional.ofNullable(inputImage)
@@ -93,8 +94,21 @@ public class SharedPanel extends JPanel {
 
     gbc.gridx = 1;
     gbc.gridy = row;
+
+    modelPaths = Optional.of(UtilsUI.getModelLocations()).orElse(new String[] {});
+
+    //extract the valid choices for iterations from the model paths
+    String[] validChoices = java.util.Arrays.stream(modelPaths)
+        .map(path -> path.replaceAll("[^0-9]", ""))
+        .filter(path -> !path.isEmpty())
+        .distinct()
+        .map(Integer::parseInt)
+        .sorted()
+        .map(String::valueOf)
+        .toArray(String[]::new);
+
     iterationJComboBox =
-        new JComboBox<Integer>(Optional.of(UtilsUI.getValidChoices()).orElse(new Integer[] {}));
+        new JComboBox<String>(validChoices);
     iterationJComboBox.setSelectedIndex(0); // Set default selection to the first item
     this.add(iterationJComboBox, gbc);
 
@@ -102,6 +116,23 @@ public class SharedPanel extends JPanel {
     gbc.gridwidth = 4;
     gbc.gridy = row;
     calculateButton = new JButton(Constants.BTN_CALCULATE);
+    calculateButton.addActionListener(e -> {
+        // Get the selected model name
+        String modelName = modelPaths[iterationJComboBox.getSelectedIndex()];
+
+        System.out.println(modelName);
+
+        // Get the PSF and input image paths
+        // String psfPath = Optional.ofNullable(psfImage).map(ImagePlus::getTitle).orElse("");
+        // String inputPath =
+        //     Optional.ofNullable(inputImage).map(ImagePlus::getTitle).orElse("");
+
+        // // Create and run the algorithm
+        // Algorithm algorithm = new Algorithm(modelName, psfPath, inputPath, 1);
+        // new Thread(algorithm).start();
+    });
+
+
     this.add(calculateButton, gbc);
     // =====================================================================
   }

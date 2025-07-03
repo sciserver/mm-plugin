@@ -52,26 +52,26 @@ public class UtilsUI {
         .orElseGet(() -> getImageFromFile(parent, title));
   }
 
-  public static Integer[] getValidChoicesFromFile() {
+  public static String[] getModelLocationsFromFile() {
     Path modelsPath = java.nio.file.Paths.get("flfm", "src", "main", "resources", "models");
 
+    String[] modelPaths = null;
     try (DirectoryStream<Path> stream =
         java.nio.file.Files.newDirectoryStream(modelsPath, "*.pt")) {
-      return java.util.stream.StreamSupport.stream(stream.spliterator(), false)
-          .map(path -> path.getFileName().toString().replaceAll("\\D", ""))
-          .map(Integer::parseInt)
+      modelPaths = java.util.stream.StreamSupport.stream(stream.spliterator(), false)
+          .map(Path::toString)
           .sorted()
-          .collect(java.util.stream.Collectors.toList())
-          .toArray(new Integer[0]);
+          .toArray(String[]::new);
     } catch (Exception e) {
       e.printStackTrace();
-      return null;
     }
+
+    return modelPaths;
   }
 
-  public static Integer[] getValidChoicesFromJar() {
+  public static String[] getModelLocationsFromJar() {
     String folderName = "models";
-    Integer[] result = null;
+    String[] result = null;
     try {
       URL url = UtilsUI.class.getClassLoader().getResource(folderName);
       if (url != null) {
@@ -88,12 +88,8 @@ public class UtilsUI {
                                 && entry.getName().startsWith(folderName + "/")
                                 && entry.getName().endsWith(".pt"))
                     .map(entry -> entry.getName().substring(folderName.length() + 1))
-                    .map(name -> name.replaceAll("\\D", ""))
-                    .filter(s -> !s.isEmpty())
-                    .map(Integer::parseInt)
                     .sorted()
-                    .collect(java.util.stream.Collectors.toList())
-                    .toArray(new Integer[0]);
+                    .toArray(String[]::new);
           }
         }
       }
@@ -104,7 +100,8 @@ public class UtilsUI {
     return result;
   }
 
-  public static Integer[] getValidChoices() {
-    return Optional.ofNullable(getValidChoicesFromJar()).orElseGet(() -> getValidChoicesFromFile());
+  public static String[] getModelLocations() {
+    return Optional.ofNullable(getModelLocationsFromJar())
+        .orElseGet(() -> getModelLocationsFromFile());
   }
 }
