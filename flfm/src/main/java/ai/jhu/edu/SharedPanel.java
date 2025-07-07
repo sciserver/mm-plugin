@@ -31,7 +31,7 @@ public class SharedPanel extends JPanel {
 
   public SharedPanel() {
 
-    PropertyConfigurator.configure("flfm/src/main/resources/logging.properties");
+    // PropertyConfigurator.configure("./flfm/src/main/resources/log4j.properties");
 
     initComponents();
   }
