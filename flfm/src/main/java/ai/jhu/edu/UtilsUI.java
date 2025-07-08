@@ -10,6 +10,9 @@ import java.util.Optional;
 import java.util.jar.JarFile;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.StyledEditorKit;
+
+import ai.djl.util.ClassLoaderUtils;
 
 public class UtilsUI {
 
@@ -74,7 +77,10 @@ public class UtilsUI {
     String folderName = "models";
     String[] result = null;
     try {
-      URL url = UtilsUI.class.getClassLoader().getResource(folderName);
+      System.err.println("trying to get resources from " + folderName);
+      // URL url = ClassLoaderUtils.getContextClassLoader().getResource(folderName);
+      URL url = UtilsUI.class.getResource(folderName);
+      System.err.println("getModelLocationsFromJar: url = " + url);
       if (url != null) {
         String path = url.getPath();
         if (path.contains(".jar!")) {
@@ -95,6 +101,8 @@ public class UtilsUI {
         }
       }
     } catch (Exception e) {
+      System.err.println(
+          "Error retrieving model locations from JAR: " + e.getMessage());
       e.printStackTrace();
     }
 

@@ -98,8 +98,8 @@ public class Algorithm {
         try {
           // The model will either be loaded from the specified path
           // if it's being run in the IDE or from the resources/models
-          // directory if it's being run as a packaged JAR.S
-          ClassLoader classLoader = Algorithm.class.getClassLoader();
+          // directory if it's being run as a packaged JAR.
+          ClassLoader classLoader = ClassLoaderUtils.getContextClassLoader();
           InputStream modelStream = classLoader.getResourceAsStream("models/" + modelPathStr);
           if (modelStream != null) {
             // If the model is found in the resources, load it from the stream
