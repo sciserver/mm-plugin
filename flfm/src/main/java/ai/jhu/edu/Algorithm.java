@@ -34,7 +34,7 @@ public class Algorithm {
       engine = Engine.getInstance();
     } catch (EngineException e) {
       System.err.println("Default engine not available, trying PyTorch engine.");
-      EngineProvider provider = (EngineProvider) ClassLoaderUtils.initClass(
+      EngineProvider provider = ClassLoaderUtils.initClass(
         ClassLoaderUtils.getContextClassLoader(),
         EngineProvider.class,
         Constants.PT_ENGINE_CLASS
