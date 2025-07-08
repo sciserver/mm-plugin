@@ -1,5 +1,6 @@
 package ai.jhu.edu;
 
+import ai.djl.util.ClassLoaderUtils;
 import ai.djl.Device;
 import ai.djl.MalformedModelException;
 import ai.djl.Model;
@@ -33,19 +34,22 @@ public class Algorithm {
       engine = Engine.getInstance();
     } catch (EngineException e) {
       System.err.println("Default engine not available, trying PyTorch engine.");
-      try {
-        EngineProvider provider =
-            (EngineProvider) Class.forName(Constants.PT_ENGINE_CLASS).newInstance();
-        engine = provider.getEngine();
-      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e1) {
-        System.err.println("PyTorch engine not available, using default engine.");
+      EngineProvider provider = (EngineProvider) ClassLoaderUtils.initClass(
+        ClassLoaderUtils.getContextClassLoader(),
+        EngineProvider.class,
+        Constants.PT_ENGINE_CLASS
+      );
+      System.out.println("PyTorch engine provider: " + provider);
+      // (EngineProvider) Class.forName(Constants.PT_ENGINE_CLASS).newInstance();
+      if (provider != null) {
+            engine = provider.getEngine();
+      } else {
+        System.err.println("PyTorch engine not available.");
       }
     }
 
     return engine;
   }
-
-
 
   public static DeviceInfo[] getDevices() {
     // Returns the available devices for model inference

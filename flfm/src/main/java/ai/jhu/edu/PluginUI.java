@@ -13,6 +13,6 @@ public class PluginUI extends PlugInFrame {
     add(new SharedPanel());
     pack();
     GUI.center(this);
-    show();
+    setVisible(true);
   }
 }
