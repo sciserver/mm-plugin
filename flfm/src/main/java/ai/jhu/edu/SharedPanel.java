@@ -11,8 +11,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
-import org.apache.log4j.PropertyConfigurator;
-
 // ClassLoader.getResourceAsStream("models/model.onnx")
 
 public class SharedPanel extends JPanel {
@@ -30,9 +28,6 @@ public class SharedPanel extends JPanel {
   private DeviceInfo[] deviceInfos;
 
   public SharedPanel() {
-
-    // PropertyConfigurator.configure("./flfm/src/main/resources/log4j.properties");
-
     initComponents();
   }
 

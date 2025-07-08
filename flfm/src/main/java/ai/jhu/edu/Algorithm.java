@@ -4,6 +4,8 @@ import ai.djl.Device;
 import ai.djl.MalformedModelException;
 import ai.djl.Model;
 import ai.djl.engine.Engine;
+import ai.djl.engine.EngineException;
+import ai.djl.engine.EngineProvider;
 import ai.djl.inference.Predictor;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDManager;
@@ -15,11 +17,48 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Algorithm {
-  private Algorithm() {}
+  private static Engine engine = null;
+
+  private Algorithm() {
+  }
+
+  private static Engine initEngine() {
+    if (engine != null) {
+      return engine;
+    }
+
+    // first try to get the default engine but if that fails, try to manually
+    // get the PyTorch engine.
+    try {
+      engine = Engine.getInstance();
+    } catch (EngineException e) {
+      System.err.println("Default engine not available, trying PyTorch engine.");
+      try {
+        EngineProvider provider =
+            (EngineProvider) Class.forName(Constants.PT_ENGINE_CLASS).newInstance();
+        engine = provider.getEngine();
+      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e1) {
+        System.err.println("PyTorch engine not available, using default engine.");
+      }
+    }
+
+    return engine;
+  }
+
+
 
   public static DeviceInfo[] getDevices() {
     // Returns the available devices for model inference
-    Device[] devices = Engine.getInstance().getDevices();
+    Device[] devices;
+    try {
+      devices = initEngine().getDevices();
+    } catch (EngineException | NullPointerException e){
+      e.printStackTrace();
+      System.err.println("Engine not available or error retrieving devices: " + e.getMessage());
+      return new DeviceInfo[] {
+        new DeviceInfo("ERR", -2) // show an error device if the engine is not available
+      };
+    }
 
     DeviceInfo[] deviceInfos;
     if (devices[0].getDeviceType().toLowerCase() == "gpu") {

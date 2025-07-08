@@ -1,10 +1,7 @@
 package ai.jhu.edu;
 
-import ij.*;
 import ij.gui.*;
 import ij.plugin.frame.*;
-import ij.process.*;
-import java.awt.*;
 
 public class PluginUI extends PlugInFrame {
 

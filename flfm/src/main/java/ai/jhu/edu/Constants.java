@@ -18,4 +18,6 @@ public class Constants {
 
   public static final String LBL_SELECT_IMG = "Select an image:";
   public static final String LBL_PROMPT_TITLE = "Open Image";
+
+  public static final String PT_ENGINE_CLASS = "ai.djl.pytorch.engine.PtEngineProvider";
 }
