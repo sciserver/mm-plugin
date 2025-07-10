@@ -35,14 +35,30 @@ public class Algorithm {
     } catch (EngineException e) {
       System.err.println("Default engine not available, trying PyTorch engine.");
       EngineProvider provider = ClassLoaderUtils.initClass(
-        ClassLoaderUtils.getContextClassLoader(),
+        // ClassLoaderUtils.getContextClassLoader(),
+        Algorithm.class.getClassLoader(),
         EngineProvider.class,
         Constants.PT_ENGINE_CLASS
       );
+      // EngineProvider provider = null;
+      // try {
+      //   // provider = (EngineProvider) Class.forName(Constants.PT_ENGINE_CLASS).newInstance();
+      // } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
+      //   e1.printStackTrace();
+      // }
       System.out.println("PyTorch engine provider: " + provider);
-      // (EngineProvider) Class.forName(Constants.PT_ENGINE_CLASS).newInstance();
       if (provider != null) {
-            engine = provider.getEngine();
+        try {
+          System.setProperty("PYTORCH_VERSION", "2.5.1");
+          engine = provider.getEngine();
+        }
+        catch (Exception ee) {
+          System.err.println("PyTorch error: " + ee.getMessage());
+          System.err.println("torch library name: " + System.mapLibraryName("torch"));
+          System.err.println("djl_torch library name: " + System.mapLibraryName("djl_torch"));
+          e.printStackTrace();
+
+        }
       } else {
         System.err.println("PyTorch engine not available.");
       }
