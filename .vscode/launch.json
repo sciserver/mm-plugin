@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Attach to ImageJ",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 8000,
+            "projectName": "flfm"
+        },
+        {
+            "type": "java",
+            "name": "Debug Remote JAR",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005,
+            "projectName": "flfm"
+        },
+        {
+            "type": "java",
+            "name": "Debug Remote JAR (Custom Host)",
+            "request": "attach",
+            "hostName": "${input:remoteHost}",
+            "port": "${input:remotePort}",
+            "projectName": "flfm"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "remoteHost",
+            "description": "Remote host IP/hostname",
+            "default": "localhost",
+            "type": "promptString"
+        },
+        {
+            "id": "remotePort",
+            "description": "Remote debug port",
+            "default": "5005",
+            "type": "promptString"
+        }
+    ]
+}

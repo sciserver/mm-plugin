@@ -1,0 +1,10 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+        "java.configuration.runtimes": [
+            {
+                "name": "JavaSE-1.8",
+                "path": "/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+            },
+        ],
+        "java.format.settings.url": ".vscode/java-formatter.xml",
+}

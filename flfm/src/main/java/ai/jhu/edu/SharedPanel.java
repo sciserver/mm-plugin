@@ -116,7 +116,14 @@ public class SharedPanel extends JPanel {
     this.add(iterationJComboBox, gbc);
 
     gbc.gridx = 2;
-    deviceInfos = Algorithm.getDevices(); // Get available devices
+
+    ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(SharedPanel.class.getClassLoader());
+      deviceInfos = Algorithm.getDevices(); // Get available devices
+    } finally {
+      Thread.currentThread().setContextClassLoader(originalClassLoader);
+    }
     // Create a JComboBox for device selection
     deviceComboBox =
         new JComboBox<String>(
@@ -143,11 +150,19 @@ public class SharedPanel extends JPanel {
                 @Override
                 protected ImagePlus doInBackground() throws Exception {
                   // Run the algorithm in the background and return the result
-                  return Algorithm.runModel(
-                      modelName,
-                      deviceInfos[deviceComboBox.getSelectedIndex()], // Get selected device
-                      psfImage,
-                      inputImage);
+                  ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+                  ImagePlus processedImage = null;
+                  try {
+                    Thread.currentThread().setContextClassLoader(SharedPanel.class.getClassLoader());
+                    processedImage = Algorithm.runModel(
+                        modelName,
+                        deviceInfos[deviceComboBox.getSelectedIndex()], // Get selected device
+                        psfImage,
+                        inputImage);
+                  } finally {
+                    Thread.currentThread().setContextClassLoader(originalClassLoader);
+                  }
+                  return processedImage;
                 }
 
                 @Override

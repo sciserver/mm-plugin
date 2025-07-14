@@ -49,7 +49,7 @@ public class Algorithm {
       System.out.println("PyTorch engine provider: " + provider);
       if (provider != null) {
         try {
-          System.setProperty("PYTORCH_VERSION", "2.5.1");
+          // System.setProperty("PYTORCH_VERSION", "2.5.1");
           engine = provider.getEngine();
         }
         catch (Exception ee) {
