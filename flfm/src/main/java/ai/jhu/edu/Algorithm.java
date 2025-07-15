@@ -17,12 +17,31 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Utility class for running deep learning models using DJL (Deep Java Library)
+ * within the context of ImageJ plugins.
+ * <p>
+ * Handles engine initialization, device selection, and model inference.
+ */
 public class Algorithm {
+  /**
+   * Singleton instance of the DJL Engine.
+   */
   private static Engine engine = null;
 
+  /**
+   * Private constructor to prevent instantiation.
+   */
   private Algorithm() {
   }
 
+  /**
+   * Initializes and returns the DJL Engine instance.
+   * <p>
+   * Attempts to get the default engine. If unavailable, tries to load the PyTorch engine manually.
+   *
+   * @return the initialized {@link Engine} instance
+   */
   private static Engine initEngine() {
     if (engine != null) {
       return engine;
@@ -67,6 +86,13 @@ public class Algorithm {
     return engine;
   }
 
+  /**
+   * Returns the available devices for model inference.
+   * <p>
+   * If the engine is not available, returns a single error device.
+   *
+   * @return an array of {@link DeviceInfo} representing available devices
+   */
   public static DeviceInfo[] getDevices() {
     // Returns the available devices for model inference
     Device[] devices;
@@ -98,6 +124,15 @@ public class Algorithm {
     return deviceInfos;
   }
 
+  /**
+   * Runs the specified model on the given input and PSF images using the selected device.
+   *
+   * @param modelPathStr the path to the model file
+   * @param deviceInfo the device to use for inference
+   * @param psfImage the point spread function image
+   * @param inputImage the input image to process
+   * @return the output {@link ImagePlus} after model inference, or {@code null} if an error occurs
+   */
   public static ImagePlus runModel(
       String modelPathStr, DeviceInfo deviceInfo, ImagePlus psfImage, ImagePlus inputImage) {
     ImagePlus outputImage = null;

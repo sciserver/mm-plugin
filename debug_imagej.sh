@@ -3,7 +3,7 @@
 # Script to start ImageJ with remote debugging enabled
 # Usage: ./debug_imagej.sh
 
-IMAGEJ_DIR="/home/ryan/repos/mm-plugin/mm_install/ij"
+IMAGEJ_DIR="/home/$USER/repos/mm-plugin/mm_install/ij"
 DEBUG_PORT=8000
 
 echo "Starting ImageJ with remote debugging on port $DEBUG_PORT"

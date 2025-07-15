@@ -5,8 +5,8 @@
 
 set -e
 
-PROJECT_DIR="/home/ryan/repos/mm-plugin/flfm"
-IMAGEJ_PLUGINS_DIR="/home/ryan/repos/mm-plugin/mm_install/ij/plugins"
+PROJECT_DIR="/home/$USER/repos/mm-plugin/flfm"
+IMAGEJ_PLUGINS_DIR="/home/$USER/repos/mm-plugin/mm_install/ij/plugins"
 DEBUG_PORT=5005
 
 echo "Building FLFM plugin..."

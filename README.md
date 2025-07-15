@@ -79,3 +79,9 @@ mvn spotless:apply
 Models need to go into `src/main/resources/models` they should be named
 according the number of iters they perform. For example, `model_1.pt` will
 come up in the dropdown as `1`.
+
+
+To ensure that the GPU can be seen when running from ImageJ, start with the following code snippet:
+```bash
+./ImageJ -cp ./plugins/flfm_plugin.jar
+```
