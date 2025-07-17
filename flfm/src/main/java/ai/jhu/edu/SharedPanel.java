@@ -11,9 +11,14 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // ClassLoader.getResourceAsStream("models/model.onnx")
 
 public class SharedPanel extends JPanel {
+
+  private static final Logger logger = LoggerFactory.getLogger(SharedPanel.class);
 
   private JButton getImageButton;
   private JButton getPSFButton;
@@ -39,6 +44,7 @@ public class SharedPanel extends JPanel {
     gbc.fill = GridBagConstraints.HORIZONTAL;
     int row = 0;
 
+    logger.debug("Initializing PSF Button");
     // Row 1 - PSF Button and Text Field ===================================
     gbc.gridx = 0;
     gbc.gridy = row;
@@ -54,6 +60,7 @@ public class SharedPanel extends JPanel {
         });
     this.add(getPSFButton, gbc);
 
+    logger.debug("Initializing PSF Text Field");
     gbc.gridx = 2;
     gbc.gridy = row;
     gbc.gridwidth = 4;
@@ -63,6 +70,7 @@ public class SharedPanel extends JPanel {
     // =====================================================================
 
     row++; // Move to the next row
+    logger.debug("Initializing Image Button");
     // Row 2 - Image Button and Text Field =================================
     gbc.gridx = 0;
     gbc.gridy = row;
@@ -80,6 +88,7 @@ public class SharedPanel extends JPanel {
         });
     this.add(getImageButton, gbc);
 
+    logger.debug("Initializing Image Text Field");
     gbc.gridx = 2;
     gbc.gridy = row;
     gbc.gridwidth = 4;
@@ -90,6 +99,7 @@ public class SharedPanel extends JPanel {
 
     // Row 3 - Iteration and Calculate Button ==============================
     row++; // Move to the next row
+    logger.debug("Initializing Iteration Label");
     gbc.gridx = 0;
     gbc.gridy = row;
     gbc.gridwidth = 1; // Reset grid width to 1 for the label
@@ -98,6 +108,7 @@ public class SharedPanel extends JPanel {
     gbc.gridx = 1;
     gbc.gridy = row;
 
+    logger.debug("Getting model locations");
     modelPaths = Optional.of(UtilsUI.getModelLocations()).orElse(new String[] {});
 
     // extract the valid choices for iterations from the model paths
@@ -111,12 +122,15 @@ public class SharedPanel extends JPanel {
             .map(String::valueOf)
             .toArray(String[]::new);
 
+    logger.debug("Valid choices for iterations: {}", (Object) validChoices);
+    logger.debug("Initializing Iteration JComboBox");
     iterationJComboBox = new JComboBox<String>(validChoices);
     iterationJComboBox.setSelectedIndex(0); // Set default selection to the first item
     this.add(iterationJComboBox, gbc);
 
     gbc.gridx = 2;
 
+    logger.debug("Getting available devices");
     ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
     try {
       Thread.currentThread().setContextClassLoader(SharedPanel.class.getClassLoader());
@@ -125,12 +139,14 @@ public class SharedPanel extends JPanel {
       Thread.currentThread().setContextClassLoader(originalClassLoader);
     }
     // Create a JComboBox for device selection
+    logger.debug("Initializing Device JComboBox");
     deviceComboBox =
         new JComboBox<String>(
             java.util.Arrays.stream(deviceInfos).map(DeviceInfo::toDisplay).toArray(String[]::new));
     deviceComboBox.setSelectedIndex(0); // Set default selection to the first item
     this.add(deviceComboBox, gbc);
 
+    logger.debug("Initializing Calculate Button");
     gbc.gridx = 3;
     gbc.gridwidth = 3;
     gbc.gridy = row;
@@ -138,8 +154,9 @@ public class SharedPanel extends JPanel {
     calculateButton.addActionListener(
         e -> {
           // Get the selected model name
+          logger.debug("Getting selected model name");
           String modelName = modelPaths[iterationJComboBox.getSelectedIndex()];
-          System.out.println(modelName);
+          logger.debug("Selected model name: {}", modelName);
 
           calculateButton.setEnabled(false);
           calculateButton.setText("Working...");
@@ -150,6 +167,7 @@ public class SharedPanel extends JPanel {
                 @Override
                 protected ImagePlus doInBackground() throws Exception {
                   // Run the algorithm in the background and return the result
+                  logger.debug("Running model: {}", modelName);
                   ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
                   ImagePlus processedImage = null;
                   try {
@@ -162,16 +180,18 @@ public class SharedPanel extends JPanel {
                   } finally {
                     Thread.currentThread().setContextClassLoader(originalClassLoader);
                   }
+                  logger.debug("Model run completed, returning processed image.");
                   return processedImage;
                 }
 
                 @Override
                 protected void done() {
                   ImagePlus result = null;
+                  logger.debug("Model run completed, processing result.");
                   try {
                     result = get(); // Retrieve the result from doInBackground
                   } catch (Exception ex) {
-                    ex.printStackTrace();
+                    logger.error("Error occurred while retrieving result: {}", ex.getMessage());
                   }
                   calculateButton.setEnabled(true); // Re-enable the button after calculation
                   calculateButton.setText(Constants.BTN_CALCULATE); // Reset button text

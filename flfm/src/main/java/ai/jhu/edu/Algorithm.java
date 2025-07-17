@@ -17,6 +17,9 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Utility class for running deep learning models using DJL (Deep Java Library)
  * within the context of ImageJ plugins.
@@ -24,10 +27,18 @@ import java.nio.file.Paths;
  * Handles engine initialization, device selection, and model inference.
  */
 public class Algorithm {
+
+
+  /**
+   * Logger for the Algorithm class.
+   */
+  private static final Logger logger = LoggerFactory.getLogger(Algorithm.class);
+
   /**
    * Singleton instance of the DJL Engine.
    */
   private static Engine engine = null;
+
 
   /**
    * Private constructor to prevent instantiation.
@@ -52,34 +63,32 @@ public class Algorithm {
     try {
       engine = Engine.getInstance();
     } catch (EngineException e) {
-      System.err.println("Default engine not available, trying PyTorch engine.");
+      logger.debug("Default engine not available, trying PyTorch engine. Error: " + e.getMessage());
+      logger.debug("Stack trace: ");
+      for (StackTraceElement ste : e.getStackTrace()) {
+        logger.debug(ste.toString());
+      }
       EngineProvider provider = ClassLoaderUtils.initClass(
-        // ClassLoaderUtils.getContextClassLoader(),
         Algorithm.class.getClassLoader(),
         EngineProvider.class,
         Constants.PT_ENGINE_CLASS
       );
-      // EngineProvider provider = null;
-      // try {
-      //   // provider = (EngineProvider) Class.forName(Constants.PT_ENGINE_CLASS).newInstance();
-      // } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e1) {
-      //   e1.printStackTrace();
-      // }
-      System.out.println("PyTorch engine provider: " + provider);
       if (provider != null) {
         try {
-          // System.setProperty("PYTORCH_VERSION", "2.5.1");
           engine = provider.getEngine();
         }
         catch (Exception ee) {
-          System.err.println("PyTorch error: " + ee.getMessage());
-          System.err.println("torch library name: " + System.mapLibraryName("torch"));
-          System.err.println("djl_torch library name: " + System.mapLibraryName("djl_torch"));
-          e.printStackTrace();
+          logger.error("PyTorch error: " + ee.getMessage());
+          logger.error("torch library name: " + System.mapLibraryName("torch"));
+          logger.error("djl_torch library name: " + System.mapLibraryName("djl_torch"));
+          logger.error("Stack trace: ");
+          for (StackTraceElement ste : ee.getStackTrace()) {
+            logger.error(ste.toString());
+          }
 
         }
       } else {
-        System.err.println("PyTorch engine not available.");
+        logger.error("PyTorch engine not available.");
       }
     }
 
@@ -99,8 +108,12 @@ public class Algorithm {
     try {
       devices = initEngine().getDevices();
     } catch (EngineException | NullPointerException e){
-      e.printStackTrace();
-      System.err.println("Engine not available or error retrieving devices: " + e.getMessage());
+      logger.error("Engine not available or error retrieving devices: " + e.getMessage());
+      logger.error("Stack trace: ");
+        for (StackTraceElement ste : e.getStackTrace()) {
+          logger.error(ste.toString());
+      }
+
       return new DeviceInfo[] {
         new DeviceInfo("ERR", -2) // show an error device if the engine is not available
       };
@@ -154,14 +167,18 @@ public class Algorithm {
           InputStream modelStream = classLoader.getResourceAsStream("models/" + modelPathStr);
           if (modelStream != null) {
             // If the model is found in the resources, load it from the stream
-            System.out.println("Loading model from resources: " + modelPathStr);
+            logger.debug("Loading model from resources: " + modelPathStr);
             model.load(modelStream);
           } else {
-            System.out.println("Loading model " + modelName + " from: " + modelPath.getParent());
+            logger.debug("Loading model " + modelName + " from: " + modelPath.getParent());
             model.load(modelPath.getParent());
           }
         } catch (IOException | MalformedModelException e) {
-          System.err.println("Error loading model: " + e.getMessage());
+          logger.debug("Error loading model: " + e.getMessage());
+          logger.error("Stack trace: ");
+          for (StackTraceElement ste : e.getStackTrace()) {
+              logger.error(ste.toString());
+          }
           return null;
         }
 
@@ -171,11 +188,15 @@ public class Algorithm {
           try {
             out = predictor.predict(new NDArray[] {inputArray, psfArray});
           } catch (TranslateException e) {
-            System.err.println("Error during prediction: " + e.getMessage());
+            logger.error("Error during prediction: " + e.getMessage());
+            logger.error("Stack trace: ");
+            for (StackTraceElement ste : e.getStackTrace()) {
+              logger.error(ste.toString());
+            }
             return null;
           }
           long end = System.currentTimeMillis();
-          System.out.println("Prediction took " + (end - start) / 1000.0 + " s");
+          logger.debug("Prediction took " + (end - start) / 1000.0 + " s");
           outputImage = ArrayUtils.convertArrayToImage(out);
         }
       }

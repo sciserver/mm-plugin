@@ -4,7 +4,6 @@ import ij.ImagePlus;
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.DirectoryStream;
@@ -15,11 +14,13 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.StyledEditorKit;
 
-import ai.djl.util.ClassLoaderUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UtilsUI {
+
+  private static final Logger logger = LoggerFactory.getLogger(UtilsUI.class);
 
   public static ImagePlus getImageFromFile(Component parent, String title) {
     JFileChooser fileChooser = new JFileChooser();
@@ -36,7 +37,7 @@ public class UtilsUI {
   public static ImagePlus getImageFromOpenWindows(Component parent) {
     String[] windowTitles = ij.WindowManager.getImageTitles();
     if (windowTitles.length == 0) {
-      System.out.println("No ImageJ windows found going to disk instead.");
+      logger.debug("No ImageJ windows found going to disk instead.");
       return null;
     }
     String selectedTitle =
@@ -80,7 +81,6 @@ public class UtilsUI {
 
   public static String[] getModelLocationsFromJar() {
     URL url = UtilsUI.class.getClassLoader().getResource("models");
-    // System.err.println(">>>Url = " + url);
     String[] result = null;
 
     if (url != null && url.getProtocol().equals("jar")) {
@@ -89,7 +89,6 @@ public class UtilsUI {
       try {
         try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"))) {
             Enumeration<JarEntry> entries = jar.entries();
-            // System.err.println("Jar entries:");
             result =
                 java.util.Collections.list(entries).stream()
                     .filter(
@@ -108,43 +107,6 @@ public class UtilsUI {
 
     return result;
   }
-
-
-  // public static String[] getModelLocationsFromJar() {
-  //   String folderName = "models";
-  //   String[] result = null;
-  //   try {
-  //     System.err.println("trying to get resources from " + folderName);
-  //     // URL url = ClassLoaderUtils.getContextClassLoader().getResource(folderName);
-  //     URL url = UtilsUI.class.getResource(folderName);
-  //     System.err.println("getModelLocationsFromJar: url = " + url);
-  //     if (url != null) {
-  //       String path = url.getPath();
-  //       if (path.contains(".jar!")) {
-  //         String jarPath = path.substring(0, path.indexOf("!")).replace("file:", "");
-
-  //         try (JarFile jarFile = new JarFile(jarPath)) {
-  //           result =
-  //               java.util.Collections.list(jarFile.entries()).stream()
-  //                   .filter(
-  //                       entry ->
-  //                           !entry.isDirectory()
-  //                               && entry.getName().startsWith(folderName + "/")
-  //                               && entry.getName().endsWith(".pt"))
-  //                   .map(entry -> entry.getName().substring(folderName.length() + 1))
-  //                   .sorted()
-  //                   .toArray(String[]::new);
-  //         }
-  //       }
-  //     }
-  //   } catch (Exception e) {
-  //     System.err.println(
-  //         "Error retrieving model locations from JAR: " + e.getMessage());
-  //     e.printStackTrace();
-  //   }
-
-  //   return result;
-  // }
 
   public static String[] getModelLocations() {
     return Optional.ofNullable(getModelLocationsFromJar())
