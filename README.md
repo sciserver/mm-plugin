@@ -85,3 +85,24 @@ To ensure that the GPU can be seen when running from ImageJ, start with the foll
 ```bash
 ./ImageJ -cp ./plugins/flfm_plugin.jar
 ```
+
+Docker Development:
+
+Make sure to have the [NVIDIA Container Toolkit is installed](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) 
+
+
+[Configure](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#configuration) the Container toolkit.
+
+
+Build the docker image:
+```bash
+docker build --tag=mm:latest -f ./docker/Dockerfile.mm .
+```
+
+
+
+
+Can run the docker image with [x11docker](https://github.com/mviereck/x11docker?tab=readme-ov-file#installation)
+```bash
+x11docker --desktop --user=RETAIN --verbose mm:latest
+```

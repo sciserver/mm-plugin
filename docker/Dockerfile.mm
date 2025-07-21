@@ -12,7 +12,8 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     # extra items we added
     apt install -y wget unzip && \
-    apt install -y wget git subversion build-essential autoconf automake libtool pkg-config autoconf-archive openjdk-8-jdk ant libboost-all-dev
+    apt install -y wget git subversion build-essential autoconf automake libtool pkg-config autoconf-archive openjdk-8-jdk ant libboost-all-dev && \
+    apt-get install -y x11-apps
 
 
 # Create the install directory where we will put the compiled micromanager
@@ -78,6 +79,6 @@ RUN micromamba run -p /tmp/env make fetchdeps
 RUN micromamba run -p /tmp/env make -j4
 RUN micromamba run -p /tmp/env make install
 
-USER root
+WORKDIR /ij
 
-CMD ["cp", "-r", "/ij", "/dest"]
+ENTRYPOINT ["/ij/ImageJ"]
